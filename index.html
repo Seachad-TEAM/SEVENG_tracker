@@ -229,13 +229,7 @@
   }
   .btn-ver:hover:not(:disabled) { border-color: var(--navy2); color: var(--navy2); }
   .btn-ver:disabled { opacity: .35; cursor: default; }
-  .btn-exec {
-    font-size: 11px; padding: 3px 8px; border: none; border-radius: 4px;
-    cursor: pointer; background: var(--navy2); color: #fff;
-    font-family: var(--sans); white-space: nowrap;
-  }
-  .btn-exec:hover { background: var(--navy3); }
-  .btn-exec.disabled { background: var(--gray1); color: var(--gray3); cursor: default; }
+
   .op { background: transparent; border: none; cursor: pointer; font-size: 13px; padding: 2px 4px; color: var(--gray2); border-radius: 3px; }
   .op:hover { color: var(--navy); background: var(--gray1); }
   .op-del:hover { color: var(--red); background: var(--red-light); }
@@ -283,11 +277,7 @@
   }
   .btn-copy:hover { border-color: var(--navy2); color: var(--navy2); }
   .btn-copy.copied { border-color: var(--green); color: var(--green); }
-  .btn-exec-m {
-    padding: 7px 14px; background: var(--navy2); color: #fff; border: none;
-    border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px;
-  }
-  .btn-exec-m:hover { background: var(--navy3); }
+
   .btn-close {
     padding: 7px 12px; background: transparent; border: 1px solid var(--border);
     border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px; color: var(--gray3); margin-left: auto;
@@ -339,7 +329,7 @@
 const ROOT_KEY    = 'seveng_v5_root';      // { projectList: [...names] }
 const projKey     = n => `seveng_v5_proj_${n}`;  // { actions, nextId, categories }
 
-const DEFAULT_CATS = ['Análisis','Backend','Frontend','Infraestructura','Testing','Reunión','Documentación','Revisión','Despliegue','Prompt SPAD','Otro'];
+const DEFAULT_CATS = ['Análisis','Backend','Frontend','Infraestructura','Testing','Reunión','Documentación','Revisión','Despliegue','Otro'];
 const PRIS  = ['Alta','Media','Baja'];
 const ESTS  = ['To Do','In Progress','Done','Blocked'];
 
@@ -542,7 +532,6 @@ function renderMain() {
           <td style="width:196px">
             <div class="row-btns">
               <button class="btn-ver" onclick="verPrompt(${a.id})" ${hasP?'':'disabled'}>📋 Ver prompt</button>
-              <button class="btn-exec ${hasP?'':'disabled'}" onclick="${hasP?`ejecutar(${a.id})`:''}" title="${hasP?'Abrir sesión nueva':'Sin prompt'}">▶ Ejecutar</button>
             </div>
           </td>
           <td style="width:56px">
@@ -576,12 +565,12 @@ function renderMain() {
   <div class="filters">
     <div class="fg">
       <span class="fg-lbl">Cat.</span>
-      <button class="chip${filterCat==='Todos'?' active':''}" onclick="setF('cat','Todos')">Todos</button>
-      ${categories.map(c=>`<button class="chip${filterCat===c?' active':''}" onclick="setF('cat',${JSON.stringify(c)})">${esc(c)}</button>`).join('')}
+      <button class="chip${filterCat==='Todos'?' active':''}" onclick="setF('cat',this)" data-val="Todos">Todos</button>
+      ${categories.map((c,i)=>`<button class="chip${filterCat===c?' active':''}" onclick="setF('cat',this)" data-idx="${i}">${esc(c)}</button>`).join('')}
     </div>
     <div class="fg">
       <span class="fg-lbl">Estado</span>
-      ${['Todos',...ESTS].map(e=>`<button class="chip${filterEst===e?' active':''}" onclick="setF('est',${JSON.stringify(e)})">${e}</button>`).join('')}
+      ${['Todos',...ESTS].map((e,i)=>`<button class="chip${filterEst===e?' active':''}" onclick="setF('est',this)" data-idx="${i}">${e}</button>`).join('')}
     </div>
   </div>
 
@@ -627,7 +616,19 @@ function goProjects() {
 }
 
 // ── Filters ───────────────────────────────────────────────────────
-function setF(k, v) { if(k==='cat') filterCat=v; else filterEst=v; render(); }
+function setF(k, btn) {
+  if (k === 'cat') {
+    const idx = btn.dataset.idx;
+    filterCat = idx === undefined ? 'Todos' : categories[parseInt(idx)];
+    // 'Todos' button has no idx
+    if (btn.dataset.val === 'Todos' || btn.textContent === 'Todos') filterCat = 'Todos';
+  } else {
+    const allEst = ['Todos', ...ESTS];
+    const idx = btn.dataset.idx;
+    filterEst = idx !== undefined ? allEst[parseInt(idx)] : 'Todos';
+  }
+  render();
+}
 
 // ── Action CRUD ───────────────────────────────────────────────────
 function newAction() {
@@ -739,10 +740,10 @@ function renderModalPrompt() {
     </div>
     ${hasP
       ?`<div class="prompt-display">${esc(a.prompt)}</div>
-        <div class="modal-hint"><strong>▶ Ejecutar</strong> — copia el prompt y abre claude.ai/new en pestaña nueva. Pega con Ctrl+V.<br><strong>📋 Copiar</strong> — copia el prompt para pegarlo donde quieras.</div>
+        <div class="modal-hint"><strong>📋 Copiar</strong> — copia el prompt para pegarlo en una sesión nueva de Claude.</div>
         <div class="modal-actions">
           <button class="btn-copy" id="btn-cp" onclick="copyPrompt(${a.id})">📋 Copiar prompt</button>
-          <button class="btn-exec-m" onclick="ejecutar(${a.id})">▶ Abrir sesión nueva</button>
+          
           <button class="btn-close" onclick="closeModal()">Cerrar</button>
         </div>`
       :`<div class="no-prompt-msg">Esta acción no tiene prompt definido.</div>
@@ -779,14 +780,7 @@ function copyPrompt(id){
   if(navigator.clipboard) navigator.clipboard.writeText(a.prompt.trim()).then(cb).catch(()=>fallbackCopy(a.prompt.trim(),cb));
   else fallbackCopy(a.prompt.trim(),cb);
 }
-function ejecutar(id){
-  const a=actions.find(x=>x.id===id); if(!a||!a.prompt) return;
-  const txt=a.prompt.trim();
-  if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>fallbackCopy(txt));
-  else fallbackCopy(txt);
-  window.open('https://claude.ai/new','_blank');
-  closeModal();
-}
+
 
 // ── Export ────────────────────────────────────────────────────────
 function exportJSON(){
