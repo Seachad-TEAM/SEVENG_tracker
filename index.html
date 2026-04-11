@@ -12,7 +12,6 @@
     --navy2: #0f1f3d;
     --navy3: #162847;
     --gold: #f0b429;
-    --gold2: #fac75a;
     --white: #f5f3ee;
     --gray1: #e8e5df;
     --gray2: #b8b4ac;
@@ -31,428 +30,459 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: var(--sans);
-    background: var(--white);
-    color: var(--navy);
-    min-height: 100vh;
-  }
+  body { font-family: var(--sans); background: var(--white); color: var(--navy); min-height: 100vh; }
 
   /* TOPBAR */
   .topbar {
-    background: var(--navy2);
-    color: #fff;
-    padding: 0 24px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    background: var(--navy2); color: #fff;
+    padding: 0 24px; height: 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
     border-bottom: 2px solid var(--gold);
   }
   .topbar-left { display: flex; align-items: center; gap: 12px; }
   .logo {
-    width: 32px; height: 32px;
-    background: var(--gold);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono);
-    font-size: 9px; font-weight: 500;
-    color: var(--navy2);
-    letter-spacing: .5px;
+    width: 32px; height: 32px; background: var(--gold);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 9px; font-weight: 500; color: var(--navy2); letter-spacing: .5px;
   }
   .proj-label { font-size: 10px; opacity: .5; letter-spacing: 1px; text-transform: uppercase; }
   .proj-name { font-size: 14px; font-weight: 500; }
   .topbar-right { display: flex; align-items: center; gap: 10px; }
-  .progress-wrap { text-align: right; }
-  .progress-pct { font-size: 11px; opacity: .6; font-family: var(--mono); }
+  .progress-pct { font-size: 11px; opacity: .6; font-family: var(--mono); text-align: right; }
   .progress-bar { width: 80px; height: 2px; background: rgba(255,255,255,.15); border-radius: 2px; margin-top: 3px; }
   .progress-fill { height: 2px; background: var(--gold); border-radius: 2px; transition: width .4s; }
   .btn-top {
     font-size: 11px; padding: 4px 10px;
-    border: 1px solid rgba(255,255,255,.25);
-    background: transparent; color: #fff;
-    border-radius: 4px; cursor: pointer;
-    font-family: var(--sans);
-    letter-spacing: .3px;
+    border: 1px solid rgba(255,255,255,.25); background: transparent; color: #fff;
+    border-radius: 4px; cursor: pointer; font-family: var(--sans);
   }
   .btn-top:hover { background: rgba(255,255,255,.08); }
 
-  /* SPLASH */
+  /* SPLASH / PROJECT SELECTOR */
   .splash {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    min-height: calc(100vh - 52px);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: calc(100vh - 52px);
     gap: 20px; padding: 2rem;
   }
   .splash-logo {
-    width: 72px; height: 72px;
-    background: var(--navy2);
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
+    width: 72px; height: 72px; background: var(--navy2);
+    border-radius: 16px; display: flex; align-items: center; justify-content: center;
     border: 2px solid var(--gold);
   }
   .splash-logo span { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--gold); }
   .splash h1 { font-size: 22px; font-weight: 300; letter-spacing: -.3px; }
   .splash p { font-size: 14px; color: var(--gray3); }
-  .splash-row { display: flex; gap: 8px; width: 100%; max-width: 360px; }
-  .splash-row input {
-    flex: 1; font-family: var(--sans); font-size: 14px;
-    padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: #fff;
-    outline: none;
+  .splash-box {
+    width: 100%; max-width: 400px;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
   }
-  .splash-row input:focus { border-color: var(--navy2); }
-  .splash-row button {
-    padding: 8px 16px;
-    background: var(--navy2); color: #fff;
-    border: none; border-radius: 4px;
-    cursor: pointer; font-family: var(--sans); font-size: 13px;
+  .splash-box-header {
+    padding: 12px 16px; background: var(--gray1);
+    font-size: 11px; color: var(--gray3);
+    text-transform: uppercase; letter-spacing: .8px;
+    border-bottom: 1px solid var(--border);
   }
-  .splash-row button:hover { background: var(--navy3); }
+  .proj-list { max-height: 220px; overflow-y: auto; }
+  .proj-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; cursor: pointer;
+    border-bottom: 1px solid var(--gray1);
+    transition: background .12s;
+  }
+  .proj-item:last-child { border-bottom: none; }
+  .proj-item:hover { background: var(--gray1); }
+  .proj-item-left { display: flex; flex-direction: column; gap: 2px; }
+  .proj-item-name { font-size: 14px; font-weight: 400; }
+  .proj-item-meta { font-size: 11px; color: var(--gray3); font-family: var(--mono); }
+  .proj-item-del {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--gray2); font-size: 14px; padding: 2px 6px; border-radius: 3px;
+  }
+  .proj-item-del:hover { color: var(--red); background: var(--red-light); }
+  .proj-empty { padding: 20px 16px; font-size: 13px; color: var(--gray3); text-align: center; }
+  .new-proj-row {
+    display: flex; gap: 0;
+    border-top: 1px solid var(--border);
+  }
+  .new-proj-row input {
+    flex: 1; font-family: var(--sans); font-size: 13px;
+    padding: 10px 14px; border: none; outline: none; background: #fff;
+  }
+  .new-proj-row button {
+    padding: 10px 16px; background: var(--navy2); color: #fff;
+    border: none; cursor: pointer; font-family: var(--sans); font-size: 13px;
+    white-space: nowrap;
+  }
+  .new-proj-row button:hover { background: var(--navy3); }
 
   /* STATS */
   .stats {
-    display: grid; grid-template-columns: repeat(5, 1fr);
+    display: grid; grid-template-columns: repeat(5,1fr);
     gap: 1px; background: var(--border);
     border-bottom: 1px solid var(--border);
   }
-  .stat {
-    background: var(--white); padding: 14px 20px;
-    text-align: center;
-  }
+  .stat { background: var(--white); padding: 14px 20px; text-align: center; }
   .stat-num { font-size: 26px; font-weight: 300; font-family: var(--mono); }
   .stat-lbl { font-size: 10px; color: var(--gray3); letter-spacing: .8px; text-transform: uppercase; margin-top: 2px; }
-  .n-todo { color: var(--amber-dark); }
-  .n-prog { color: var(--blue); }
-  .n-done { color: var(--green); }
-  .n-blk  { color: var(--red); }
+  .n-todo{color:var(--amber-dark)} .n-prog{color:var(--blue)} .n-done{color:var(--green)} .n-blk{color:var(--red)}
 
   /* FILTERS */
   .filters {
-    padding: 10px 24px;
-    display: flex; flex-wrap: wrap; gap: 12px;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    background: #fff;
+    padding: 10px 24px; display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center; border-bottom: 1px solid var(--border); background: #fff;
   }
-  .fg { display: flex; align-items: center; gap: 5px; }
-  .fg-lbl { font-size: 11px; color: var(--gray3); text-transform: uppercase; letter-spacing: .8px; margin-right: 2px; }
+  .fg { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .fg-lbl { font-size: 11px; color: var(--gray3); text-transform: uppercase; letter-spacing: .8px; margin-right: 2px; white-space: nowrap; }
   .chip {
-    font-size: 11px; padding: 3px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    cursor: pointer; background: transparent;
-    color: var(--gray3); font-family: var(--sans);
-    transition: all .15s;
+    font-size: 11px; padding: 3px 10px; border-radius: 20px;
+    border: 1px solid var(--border); cursor: pointer;
+    background: transparent; color: var(--gray3); font-family: var(--sans);
+    transition: all .12s;
   }
   .chip.active { background: var(--navy2); color: #fff; border-color: var(--navy2); }
   .chip:hover:not(.active) { border-color: var(--navy2); color: var(--navy2); }
 
   /* TOOLBAR */
   .toolbar {
-    padding: 10px 24px;
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--white);
+    padding: 10px 24px; display: flex; align-items: center;
+    justify-content: space-between; background: var(--white);
   }
+  .toolbar-left { display: flex; gap: 8px; }
   .btn-add {
     font-size: 12px; padding: 6px 14px;
     background: var(--navy2); color: #fff;
-    border: none; border-radius: 4px;
-    cursor: pointer; font-family: var(--sans);
-    letter-spacing: .3px;
+    border: none; border-radius: 4px; cursor: pointer; font-family: var(--sans);
   }
   .btn-add:hover { background: var(--navy3); }
+  .btn-cats {
+    font-size: 12px; padding: 6px 12px;
+    background: transparent; color: var(--gray3);
+    border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-family: var(--sans);
+  }
+  .btn-cats:hover { border-color: var(--navy2); color: var(--navy2); }
   .count { font-size: 12px; color: var(--gray3); font-family: var(--mono); }
 
   /* FORM */
   .form-panel {
     margin: 0 24px 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
-    background: #fff;
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 16px; background: #fff;
   }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .ff { grid-column: 1 / -1; }
+  .ff { grid-column: 1/-1; }
   .fr { display: flex; flex-direction: column; gap: 5px; }
   .fl { font-size: 11px; color: var(--gray3); text-transform: uppercase; letter-spacing: .6px; }
   .fl .req { color: var(--red); }
-  .form-grid input,
-  .form-grid select,
-  .form-grid textarea {
-    font-family: var(--sans); font-size: 13px;
-    padding: 7px 10px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--white);
-    color: var(--navy);
-    outline: none;
-    width: 100%;
+  .form-grid input, .form-grid select, .form-grid textarea {
+    font-family: var(--sans); font-size: 13px; padding: 7px 10px;
+    border: 1px solid var(--border); border-radius: 4px;
+    background: var(--white); color: var(--navy); outline: none; width: 100%;
   }
-  .form-grid input:focus,
-  .form-grid select:focus,
-  .form-grid textarea:focus { border-color: var(--navy2); background: #fff; }
-  .prompt-textarea {
-    font-family: var(--mono) !important;
-    font-size: 12px !important;
-    line-height: 1.6;
-    resize: vertical;
+  .form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus {
+    border-color: var(--navy2); background: #fff;
   }
+  .prompt-ta { font-family: var(--mono) !important; font-size: 12px !important; line-height: 1.6; resize: vertical; }
   .form-actions { display: flex; gap: 8px; margin-top: 8px; }
   .btn-save {
     padding: 6px 16px; background: var(--navy2); color: #fff;
-    border: none; border-radius: 4px; cursor: pointer;
-    font-family: var(--sans); font-size: 13px;
+    border: none; border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px;
   }
   .btn-save:hover { background: var(--navy3); }
   .btn-cancel {
     padding: 6px 12px; background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 4px; cursor: pointer;
-    font-family: var(--sans); font-size: 13px; color: var(--gray3);
+    border: 1px solid var(--border); border-radius: 4px;
+    cursor: pointer; font-family: var(--sans); font-size: 13px; color: var(--gray3);
   }
   .btn-cancel:hover { border-color: var(--navy2); color: var(--navy2); }
 
   /* TABLE */
-  .tbl-wrap { padding: 0 24px 24px; overflow-x: auto; }
+  .tbl-wrap { padding: 0 24px 80px; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead tr { background: var(--navy2); }
   th {
-    color: rgba(255,255,255,.7); padding: 9px 12px;
-    text-align: left; font-size: 10px; font-weight: 500;
-    letter-spacing: .8px; text-transform: uppercase;
-    white-space: nowrap;
+    color: rgba(255,255,255,.7); padding: 9px 12px; text-align: left;
+    font-size: 10px; font-weight: 500; letter-spacing: .8px;
+    text-transform: uppercase; white-space: nowrap;
   }
   td { padding: 9px 12px; border-bottom: 1px solid var(--gray1); vertical-align: middle; }
   tr:hover td { background: #fafaf8; }
-
-  .badge {
-    display: inline-block; font-size: 10px;
-    padding: 2px 8px; border-radius: 20px; font-weight: 500;
-  }
-  .b-todo  { background: var(--amber-light); color: var(--amber-dark); }
-  .b-prog  { background: var(--blue-light); color: var(--blue); }
-  .b-done  { background: var(--green-light); color: var(--green); }
-  .b-blk   { background: var(--red-light); color: var(--red); }
-  .b-cat   { background: var(--gray1); color: var(--gray3); font-size: 10px; }
-  .b-alta  { background: var(--red-light); color: var(--red); }
-  .b-media { background: var(--amber-light); color: var(--amber-dark); }
-  .b-baja  { background: var(--green-light); color: var(--green); }
-
-  .action-name { font-size: 13px; font-weight: 400; }
+  .action-name { font-size: 13px; }
   .action-note { font-size: 11px; color: var(--gray3); margin-top: 2px; }
+
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .b-todo{background:var(--amber-light);color:var(--amber-dark)}
+  .b-prog{background:var(--blue-light);color:var(--blue)}
+  .b-done{background:var(--green-light);color:var(--green)}
+  .b-blk{background:var(--red-light);color:var(--red)}
+  .b-cat{background:var(--gray1);color:var(--gray3);font-size:10px}
+  .b-alta{background:var(--red-light);color:var(--red)}
+  .b-media{background:var(--amber-light);color:var(--amber-dark)}
+  .b-baja{background:var(--green-light);color:var(--green)}
 
   .row-btns { display: flex; gap: 4px; align-items: center; }
   .btn-ver {
-    font-size: 11px; padding: 3px 8px;
-    border: 1px solid var(--border); border-radius: 4px;
-    cursor: pointer; background: #fff; color: var(--gray3);
-    font-family: var(--sans); white-space: nowrap;
-    transition: all .15s;
+    font-size: 11px; padding: 3px 8px; border: 1px solid var(--border);
+    border-radius: 4px; cursor: pointer; background: #fff; color: var(--gray3);
+    font-family: var(--sans); white-space: nowrap; transition: all .12s;
   }
-  .btn-ver:hover { border-color: var(--navy2); color: var(--navy2); }
+  .btn-ver:hover:not(:disabled) { border-color: var(--navy2); color: var(--navy2); }
   .btn-ver:disabled { opacity: .35; cursor: default; }
-  .btn-ver:disabled:hover { border-color: var(--border); color: var(--gray3); }
   .btn-exec {
-    font-size: 11px; padding: 3px 8px;
-    border: none; border-radius: 4px;
+    font-size: 11px; padding: 3px 8px; border: none; border-radius: 4px;
     cursor: pointer; background: var(--navy2); color: #fff;
     font-family: var(--sans); white-space: nowrap;
-    transition: background .15s;
   }
   .btn-exec:hover { background: var(--navy3); }
   .btn-exec.disabled { background: var(--gray1); color: var(--gray3); cursor: default; }
-  .op {
-    background: transparent; border: none; cursor: pointer;
-    font-size: 13px; padding: 2px 4px; color: var(--gray2);
-    border-radius: 3px;
-  }
+  .op { background: transparent; border: none; cursor: pointer; font-size: 13px; padding: 2px 4px; color: var(--gray2); border-radius: 3px; }
   .op:hover { color: var(--navy); background: var(--gray1); }
   .op-del:hover { color: var(--red); background: var(--red-light); }
-
   .empty { text-align: center; padding: 48px; color: var(--gray3); font-size: 14px; }
 
   /* FOOTER */
   .foot {
-    padding: 12px 24px;
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 12px; color: var(--gray3);
-    border-top: 1px solid var(--border);
-    background: #fff;
-    position: sticky; bottom: 0;
+    padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; color: var(--gray3); border-top: 1px solid var(--border);
+    background: #fff; position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
   }
   .fbtns { display: flex; gap: 12px; }
-  .fbtns button {
-    font-size: 12px; background: transparent; border: none;
-    cursor: pointer; color: var(--gray3); font-family: var(--sans);
-    padding: 0;
-  }
+  .fbtns button { font-size: 12px; background: transparent; border: none; cursor: pointer; color: var(--gray3); font-family: var(--sans); }
   .fbtns button:hover { color: var(--navy); }
   .fbtns .btn-reset:hover { color: var(--red); }
 
-  /* MODAL OVERLAY */
+  /* OVERLAY / MODALS */
   .overlay {
-    position: fixed; inset: 0;
-    background: rgba(10, 22, 40, 0.6);
+    position: fixed; inset: 0; background: rgba(10,22,40,.55);
     display: flex; align-items: center; justify-content: center;
-    z-index: 200;
-    backdrop-filter: blur(2px);
+    z-index: 200; backdrop-filter: blur(2px);
   }
   .modal {
-    background: #fff;
-    border-radius: 8px;
-    padding: 24px;
-    width: 580px; max-width: 95vw;
-    max-height: 85vh; overflow-y: auto;
-    border: 1px solid var(--border);
-    box-shadow: 0 8px 40px rgba(10,22,40,.15);
+    background: #fff; border-radius: 8px; padding: 24px;
+    width: 580px; max-width: 95vw; max-height: 85vh; overflow-y: auto;
+    border: 1px solid var(--border); box-shadow: 0 8px 40px rgba(10,22,40,.15);
   }
-  .modal-header { margin-bottom: 4px; }
-  .modal-title { font-size: 16px; font-weight: 500; }
+  .modal-sm { width: 400px; }
+  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
   .modal-meta { display: flex; gap: 6px; margin-bottom: 14px; margin-top: 6px; }
   .prompt-display {
-    background: var(--navy);
-    color: #e8f0fc;
-    border-radius: 6px;
-    padding: 16px;
-    font-family: var(--mono);
-    font-size: 12px;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 320px;
-    overflow-y: auto;
+    background: var(--navy); color: #e8f0fc; border-radius: 6px; padding: 16px;
+    font-family: var(--mono); font-size: 12px; line-height: 1.7;
+    white-space: pre-wrap; word-break: break-word; max-height: 300px; overflow-y: auto;
   }
   .modal-hint {
-    font-size: 11px; color: var(--gray3);
-    margin-top: 10px; line-height: 1.6;
-    padding: 8px 12px;
-    background: var(--gray1); border-radius: 4px;
+    font-size: 11px; color: var(--gray3); margin-top: 10px; line-height: 1.6;
+    padding: 8px 12px; background: var(--gray1); border-radius: 4px;
   }
   .modal-hint strong { color: var(--navy); }
   .modal-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
   .btn-copy {
-    padding: 7px 14px; background: transparent;
-    border: 1px solid var(--border); border-radius: 4px;
-    cursor: pointer; font-family: var(--sans); font-size: 13px;
-    color: var(--gray3); transition: all .15s;
+    padding: 7px 14px; background: transparent; border: 1px solid var(--border);
+    border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px; color: var(--gray3);
   }
   .btn-copy:hover { border-color: var(--navy2); color: var(--navy2); }
   .btn-copy.copied { border-color: var(--green); color: var(--green); }
-  .btn-exec-modal {
-    padding: 7px 14px; background: var(--navy2); color: #fff;
-    border: none; border-radius: 4px; cursor: pointer;
-    font-family: var(--sans); font-size: 13px;
+  .btn-exec-m {
+    padding: 7px 14px; background: var(--navy2); color: #fff; border: none;
+    border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px;
   }
-  .btn-exec-modal:hover { background: var(--navy3); }
+  .btn-exec-m:hover { background: var(--navy3); }
   .btn-close {
-    padding: 7px 12px; background: transparent;
-    border: 1px solid var(--border); border-radius: 4px;
-    cursor: pointer; font-family: var(--sans); font-size: 13px;
-    color: var(--gray3); margin-left: auto;
+    padding: 7px 12px; background: transparent; border: 1px solid var(--border);
+    border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px; color: var(--gray3); margin-left: auto;
   }
   .btn-close:hover { border-color: var(--navy2); color: var(--navy2); }
-  .no-prompt-msg {
-    text-align: center; padding: 24px;
-    color: var(--gray3); font-size: 13px;
-    background: var(--gray1); border-radius: 6px;
-  }
-
-  .modal-del .modal-title { font-size: 15px; }
-  .modal-del p { font-size: 13px; color: var(--gray3); margin: 10px 0 18px; }
-  .mbtns { display: flex; gap: 8px; justify-content: flex-end; }
-  .btn-danger {
-    padding: 6px 14px; background: var(--red); color: #fff;
-    border: none; border-radius: 4px; cursor: pointer;
-    font-family: var(--sans); font-size: 13px;
-  }
+  .no-prompt-msg { text-align: center; padding: 24px; color: var(--gray3); font-size: 13px; background: var(--gray1); border-radius: 6px; }
+  .mbtns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .btn-danger { padding: 6px 14px; background: var(--red); color: #fff; border: none; border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px; }
   .btn-danger:hover { opacity: .9; }
 
-  select option { font-family: var(--sans); }
+  /* CATEGORIES MODAL */
+  .cats-list { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; max-height: 260px; overflow-y: auto; }
+  .cat-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: var(--gray1); border-radius: 4px;
+  }
+  .cat-item-name { font-size: 13px; }
+  .cat-item-del {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--gray2); font-size: 13px; padding: 2px 6px; border-radius: 3px;
+  }
+  .cat-item-del:hover { color: var(--red); background: var(--red-light); }
+  .cat-item-del:disabled { opacity: .3; cursor: default; }
+  .new-cat-row { display: flex; gap: 8px; margin-top: 8px; }
+  .new-cat-row input {
+    flex: 1; font-family: var(--sans); font-size: 13px; padding: 7px 10px;
+    border: 1px solid var(--border); border-radius: 4px; outline: none;
+  }
+  .new-cat-row input:focus { border-color: var(--navy2); }
+  .new-cat-row button {
+    padding: 7px 14px; background: var(--navy2); color: #fff; border: none;
+    border-radius: 4px; cursor: pointer; font-family: var(--sans); font-size: 13px;
+  }
+  .new-cat-row button:hover { background: var(--navy3); }
+  .cat-warning { font-size: 11px; color: var(--gray3); margin-top: 6px; }
 
   @media (max-width: 700px) {
-    .stats { grid-template-columns: repeat(3, 1fr); }
+    .stats { grid-template-columns: repeat(3,1fr); }
     .form-grid { grid-template-columns: 1fr; }
     .ff { grid-column: 1; }
-    .tbl-wrap { padding: 0 12px 24px; }
-    .filters, .toolbar, .foot { padding-left: 12px; padding-right: 12px; }
+    .tbl-wrap, .filters, .toolbar, .foot { padding-left: 12px; padding-right: 12px; }
   }
 </style>
 </head>
 <body>
-
 <div id="app"></div>
-
 <script>
-const CATS = ['Todos','Análisis','Backend','Frontend','Infraestructura','Testing','Reunión','Documentación','Revisión','Despliegue','Prompt SPAD','Otro'];
-const PRIS = ['Alta','Media','Baja'];
-const ESTS = ['To Do','In Progress','Done','Blocked'];
-const KEY  = 'seveng_tracker_v4';
+// ── Storage keys ──────────────────────────────────────────────────
+const ROOT_KEY    = 'seveng_v5_root';      // { projectList: [...names] }
+const projKey     = n => `seveng_v5_proj_${n}`;  // { actions, nextId, categories }
 
-let project = null, actions = [], filterCat = 'Todos', filterEst = 'Todos';
-let showForm = false, editId = null, confirmDel = null, modalPrompt = null, nextId = 1;
-let form = { accion:'', categoria:'Prompt SPAD', prioridad:'Media', responsable:'', fin:'', estado:'To Do', prompt:'', notas:'' };
+const DEFAULT_CATS = ['Análisis','Backend','Frontend','Infraestructura','Testing','Reunión','Documentación','Revisión','Despliegue','Prompt SPAD','Otro'];
+const PRIS  = ['Alta','Media','Baja'];
+const ESTS  = ['To Do','In Progress','Done','Blocked'];
 
-function save() {
-  try { localStorage.setItem(KEY, JSON.stringify({ project, actions, nextId })); } catch(e) {}
-}
-function load() {
+// ── State ─────────────────────────────────────────────────────────
+let projectList = [];   // all project names
+let project     = null; // current project name
+let actions     = [];
+let categories  = [...DEFAULT_CATS];
+let nextId      = 1;
+
+let filterCat   = 'Todos';
+let filterEst   = 'Todos';
+let showForm    = false;
+let editId      = null;
+let confirmDel  = null;
+let modalPrompt = null;
+let showCatsMgr = false;
+let showProjSel = false;
+
+let form = { accion:'', categoria:'', prioridad:'Media', responsable:'', fin:'', estado:'To Do', prompt:'', notas:'' };
+
+// ── Persistence ───────────────────────────────────────────────────
+function loadRoot() {
   try {
-    const d = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (d) { project = d.project || null; actions = d.actions || []; nextId = d.nextId || 1; }
+    const d = JSON.parse(localStorage.getItem(ROOT_KEY) || 'null');
+    if (d && d.projectList) projectList = d.projectList;
   } catch(e) {}
 }
-load();
-
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function saveRoot() {
+  try { localStorage.setItem(ROOT_KEY, JSON.stringify({ projectList })); } catch(e) {}
 }
-function sc(s) { return s==='To Do'?'b-todo':s==='In Progress'?'b-prog':s==='Done'?'b-done':s==='Blocked'?'b-blk':''; }
-function sp(p) { return p==='Alta'?'b-alta':p==='Media'?'b-media':'b-baja'; }
+function loadProject(name) {
+  try {
+    const d = JSON.parse(localStorage.getItem(projKey(name)) || 'null');
+    if (d) {
+      actions    = d.actions    || [];
+      nextId     = d.nextId     || 1;
+      categories = d.categories || [...DEFAULT_CATS];
+    } else {
+      actions    = [];
+      nextId     = 1;
+      categories = [...DEFAULT_CATS];
+    }
+  } catch(e) { actions=[]; nextId=1; categories=[...DEFAULT_CATS]; }
+}
+function saveProject() {
+  if (!project) return;
+  try { localStorage.setItem(projKey(project), JSON.stringify({ actions, nextId, categories })); } catch(e) {}
+}
 
+loadRoot();
+
+// ── Helpers ───────────────────────────────────────────────────────
+const esc = s => !s ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const sc  = s => s==='To Do'?'b-todo':s==='In Progress'?'b-prog':s==='Done'?'b-done':s==='Blocked'?'b-blk':'';
+const sp  = p => p==='Alta'?'b-alta':p==='Media'?'b-media':'b-baja';
+
+// ── Main render ───────────────────────────────────────────────────
 function render() { project ? renderMain() : renderSplash(); }
 
+// ── SPLASH ────────────────────────────────────────────────────────
 function renderSplash() {
-  document.getElementById('app').innerHTML = `
+  const app = document.getElementById('app');
+  const listHtml = projectList.length === 0
+    ? `<div class="proj-empty">Aún no hay proyectos. Crea el primero.</div>`
+    : projectList.map(n => {
+        const d = (() => { try { return JSON.parse(localStorage.getItem(projKey(n))||'null'); } catch(e){return null;} })();
+        const count = d ? (d.actions||[]).length : 0;
+        const done  = d ? (d.actions||[]).filter(a=>a.estado==='Done').length : 0;
+        return `<div class="proj-item" onclick="openProject('${esc(n)}')">
+          <div class="proj-item-left">
+            <div class="proj-item-name">${esc(n)}</div>
+            <div class="proj-item-meta">${count} acciones · ${count?Math.round(done/count*100):0}% done</div>
+          </div>
+          <button class="proj-item-del" onclick="event.stopPropagation();deleteProject('${esc(n)}')" title="Eliminar proyecto">✕</button>
+        </div>`;
+      }).join('');
+
+  app.innerHTML = `
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo">S7G</div>
+      <div><div class="proj-label">SEVEN-G</div><div class="proj-name">Action Tracker</div></div>
+    </div>
+  </div>
   <div class="splash">
     <div class="splash-logo"><span>S7G</span></div>
     <h1>SEVEN-G Action Tracker</h1>
-    <p>¿Para qué proyecto es este tracker?</p>
-    <div class="splash-row">
-      <input id="pi" type="text" placeholder="Nombre del proyecto..." />
-      <button onclick="enterProject()">Entrar →</button>
+    <p>Selecciona un proyecto o crea uno nuevo</p>
+    <div class="splash-box">
+      ${projectList.length > 0 ? `<div class="splash-box-header">Proyectos guardados</div>` : ''}
+      <div class="proj-list">${listHtml}</div>
+      <div class="new-proj-row">
+        <input id="pi" type="text" placeholder="Nombre del nuevo proyecto..." />
+        <button onclick="createProject()">+ Crear</button>
+      </div>
     </div>
   </div>`;
+
   const i = document.getElementById('pi');
-  i.addEventListener('keydown', e => { if (e.key === 'Enter') enterProject(); });
-  i.focus();
+  i.addEventListener('keydown', e => { if (e.key==='Enter') createProject(); });
+  if (projectList.length === 0) i.focus();
 }
 
-function enterProject() {
+function createProject() {
   const v = (document.getElementById('pi').value || '').trim();
   if (!v) return;
-  project = v; save(); render();
+  if (!projectList.includes(v)) { projectList.push(v); saveRoot(); }
+  openProject(v);
 }
 
-function renderMain() {
-  const fil = actions.filter(a =>
-    (filterCat === 'Todos' || a.categoria === filterCat) &&
-    (filterEst === 'Todos' || a.estado === filterEst)
-  );
-  const tot = actions.length;
-  const todo = actions.filter(a => a.estado === 'To Do').length;
-  const prog = actions.filter(a => a.estado === 'In Progress').length;
-  const done = actions.filter(a => a.estado === 'Done').length;
-  const blk  = actions.filter(a => a.estado === 'Blocked').length;
-  const pct  = tot ? Math.round(done / tot * 100) : 0;
+function openProject(name) {
+  project = name;
+  loadProject(name);
+  filterCat = 'Todos'; filterEst = 'Todos';
+  showForm = false; editId = null;
+  form.categoria = categories[0] || '';
+  render();
+}
 
+function deleteProject(name) {
+  if (!confirm(`¿Eliminar el proyecto "${name}" y todas sus acciones? No se puede deshacer.`)) return;
+  projectList = projectList.filter(n => n !== name);
+  try { localStorage.removeItem(projKey(name)); } catch(e) {}
+  saveRoot();
+  render();
+}
+
+// ── MAIN ──────────────────────────────────────────────────────────
+function renderMain() {
+  const app = document.getElementById('app');
+  const fil = actions.filter(a =>
+    (filterCat==='Todos' || a.categoria===filterCat) &&
+    (filterEst==='Todos' || a.estado===filterEst)
+  );
+  const tot  = actions.length;
+  const todo = actions.filter(a=>a.estado==='To Do').length;
+  const prog = actions.filter(a=>a.estado==='In Progress').length;
+  const done = actions.filter(a=>a.estado==='Done').length;
+  const blk  = actions.filter(a=>a.estado==='Blocked').length;
+  const pct  = tot ? Math.round(done/tot*100) : 0;
+
+  // Form
   const formHtml = showForm ? `
   <div class="form-panel">
     <div class="form-grid">
@@ -462,7 +492,7 @@ function renderMain() {
       </div>
       <div class="fr">
         <label class="fl">Categoría</label>
-        <select id="f-cat">${CATS.slice(1).map(c=>`<option value="${c}"${form.categoria===c?' selected':''}>${c}</option>`).join('')}</select>
+        <select id="f-cat">${categories.map(c=>`<option value="${c}"${form.categoria===c?' selected':''}>${c}</option>`).join('')}</select>
       </div>
       <div class="fr">
         <label class="fl">Prioridad</label>
@@ -482,7 +512,7 @@ function renderMain() {
       </div>
       <div class="ff fr">
         <label class="fl">Prompt <span style="text-transform:none;letter-spacing:0;font-size:11px;opacity:.7">(texto exacto a enviar a Claude)</span></label>
-        <textarea id="f-prm" class="prompt-textarea" rows="6" placeholder="Escribe aquí el prompt completo que se enviará a Claude en una sesión limpia...">${esc(form.prompt)}</textarea>
+        <textarea id="f-prm" class="prompt-ta" rows="6" placeholder="Escribe aquí el prompt completo que se enviará a Claude en una sesión limpia...">${esc(form.prompt)}</textarea>
       </div>
       <div class="ff fr">
         <label class="fl">Notas internas</label>
@@ -490,28 +520,29 @@ function renderMain() {
       </div>
     </div>
     <div class="form-actions">
-      <button class="btn-save" onclick="saveAction()">${editId ? 'Actualizar' : 'Guardar'}</button>
+      <button class="btn-save" onclick="saveAction()">${editId?'Actualizar':'Guardar'}</button>
       <button class="btn-cancel" onclick="cancelForm()">Cancelar</button>
     </div>
   </div>` : '';
 
+  // Rows
   const rows = fil.length === 0
     ? `<tr><td colspan="7" class="empty">Sin acciones. Pulsa "+ Nueva acción" para empezar.</td></tr>`
     : fil.map(a => {
         const hasP = !!(a.prompt && a.prompt.trim());
         return `<tr>
           <td style="color:var(--gray3);font-family:var(--mono);font-size:11px;width:36px">#${a.id}</td>
-          <td style="width:88px"><span class="badge b-cat">${a.categoria}</span></td>
+          <td style="width:90px"><span class="badge b-cat">${esc(a.categoria)}</span></td>
           <td>
             <div class="action-name">${esc(a.accion)}</div>
-            ${a.notas ? `<div class="action-note">${esc(a.notas.slice(0,72))}${a.notas.length>72?'…':''}</div>` : ''}
+            ${a.notas?`<div class="action-note">${esc(a.notas.slice(0,72))}${a.notas.length>72?'…':''}</div>`:''}
           </td>
           <td style="width:68px"><span class="badge ${sp(a.prioridad)}">${a.prioridad}</span></td>
           <td style="width:92px"><span class="badge ${sc(a.estado)}">${a.estado}</span></td>
           <td style="width:196px">
             <div class="row-btns">
               <button class="btn-ver" onclick="verPrompt(${a.id})" ${hasP?'':'disabled'}>📋 Ver prompt</button>
-              <button class="btn-exec ${hasP?'':'disabled'}" onclick="${hasP?`ejecutar(${a.id})`:''}" title="${hasP?'Abrir sesión nueva con este prompt':'Define un prompt primero'}">▶ Ejecutar</button>
+              <button class="btn-exec ${hasP?'':'disabled'}" onclick="${hasP?`ejecutar(${a.id})`:''}" title="${hasP?'Abrir sesión nueva':'Sin prompt'}">▶ Ejecutar</button>
             </div>
           </td>
           <td style="width:56px">
@@ -521,21 +552,16 @@ function renderMain() {
         </tr>`;
       }).join('');
 
-  document.getElementById('app').innerHTML = `
+  app.innerHTML = `
   <div class="topbar">
     <div class="topbar-left">
       <div class="logo">S7G</div>
-      <div>
-        <div class="proj-label">Proyecto activo</div>
-        <div class="proj-name">${esc(project)}</div>
-      </div>
+      <div><div class="proj-label">Proyecto activo</div><div class="proj-name">${esc(project)}</div></div>
     </div>
     <div class="topbar-right">
-      <div class="progress-wrap">
-        <div class="progress-pct">${pct}% completado</div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      </div>
-      <button class="btn-top" onclick="changeProject()">⇄ Cambiar proyecto</button>
+      <div><div class="progress-pct">${pct}% completado</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>
+      <button class="btn-top" onclick="goProjects()">⇄ Proyectos</button>
     </div>
   </div>
 
@@ -550,7 +576,8 @@ function renderMain() {
   <div class="filters">
     <div class="fg">
       <span class="fg-lbl">Cat.</span>
-      ${CATS.map(c=>`<button class="chip${filterCat===c?' active':''}" onclick="setF('cat',${JSON.stringify(c)})">${c}</button>`).join('')}
+      <button class="chip${filterCat==='Todos'?' active':''}" onclick="setF('cat','Todos')">Todos</button>
+      ${categories.map(c=>`<button class="chip${filterCat===c?' active':''}" onclick="setF('cat',${JSON.stringify(c)})">${esc(c)}</button>`).join('')}
     </div>
     <div class="fg">
       <span class="fg-lbl">Estado</span>
@@ -559,7 +586,10 @@ function renderMain() {
   </div>
 
   <div class="toolbar">
-    <button class="btn-add" onclick="newAction()">+ Nueva acción</button>
+    <div class="toolbar-left">
+      <button class="btn-add" onclick="newAction()">+ Nueva acción</button>
+      <button class="btn-cats" onclick="openCatsMgr()">⚙ Categorías</button>
+    </div>
     <span class="count">${fil.length} / ${tot}</span>
   </div>
 
@@ -575,117 +605,40 @@ function renderMain() {
   </div>
 
   <div class="foot">
-    <span>Proyecto: <strong>${esc(project)}</strong> &nbsp;·&nbsp; ${tot} acciones &nbsp;·&nbsp; ${pct}% done</span>
+    <span>Proyecto: <strong>${esc(project)}</strong> · ${tot} acciones · ${pct}% done</span>
     <div class="fbtns">
       <button onclick="exportJSON()">Exportar JSON</button>
       <button onclick="exportCSV()">Exportar CSV</button>
-      <button class="btn-reset" onclick="resetAll()">Resetear</button>
+      <button class="btn-reset" onclick="resetAll()">Resetear acciones</button>
     </div>
   </div>
   `;
 
   if (modalPrompt !== null) renderModalPrompt();
   if (confirmDel  !== null) renderModalDel();
+  if (showCatsMgr)          renderCatsMgr();
 }
 
-function renderModalPrompt() {
-  const a = actions.find(x => x.id === modalPrompt);
-  if (!a) return;
-  const hasP = !!(a.prompt && a.prompt.trim());
-  const div = document.createElement('div');
-  div.className = 'overlay';
-  div.addEventListener('click', e => { if (e.target === div) closeModal(); });
-  div.innerHTML = `<div class="modal">
-    <div class="modal-header"><div class="modal-title">${esc(a.accion)}</div></div>
-    <div class="modal-meta">
-      <span class="badge b-cat">${a.categoria}</span>
-      <span class="badge ${sp(a.prioridad)}">${a.prioridad}</span>
-      <span class="badge ${sc(a.estado)}">${a.estado}</span>
-    </div>
-    ${hasP
-      ? `<div class="prompt-display">${esc(a.prompt)}</div>
-         <div class="modal-hint">
-           <strong>▶ Ejecutar</strong> — copia el prompt y abre claude.ai/new en pestaña nueva. Pega con Ctrl+V al llegar.<br>
-           <strong>📋 Copiar</strong> — copia el prompt para pegarlo donde quieras.
-         </div>
-         <div class="modal-actions">
-           <button class="btn-copy" id="btn-cp" onclick="copyPrompt(${a.id})">📋 Copiar prompt</button>
-           <button class="btn-exec-modal" onclick="ejecutar(${a.id})">▶ Abrir sesión nueva</button>
-           <button class="btn-close" onclick="closeModal()">Cerrar</button>
-         </div>`
-      : `<div class="no-prompt-msg">Esta acción no tiene prompt definido.<br>Edítala para añadirlo.</div>
-         <div class="modal-actions">
-           <button class="btn-close" onclick="closeModal()">Cerrar</button>
-           <button class="btn-save" onclick="closeModal();editAction(${a.id})">✎ Editar acción</button>
-         </div>`
-    }
-  </div>`;
-  document.getElementById('app').appendChild(div);
+// ── Project navigation ────────────────────────────────────────────
+function goProjects() {
+  saveProject();
+  project = null; showForm = false; editId = null;
+  render();
 }
 
-function renderModalDel() {
-  const div = document.createElement('div');
-  div.className = 'overlay';
-  div.addEventListener('click', e => { if (e.target === div) cancelDel(); });
-  div.innerHTML = `<div class="modal modal-del">
-    <div class="modal-title">Eliminar acción</div>
-    <p>¿Eliminar la acción #${confirmDel}? Esta acción no se puede deshacer.</p>
-    <div class="mbtns">
-      <button class="btn-cancel" onclick="cancelDel()">Cancelar</button>
-      <button class="btn-danger" onclick="doDelete()">Eliminar</button>
-    </div>
-  </div>`;
-  document.getElementById('app').appendChild(div);
-}
+// ── Filters ───────────────────────────────────────────────────────
+function setF(k, v) { if(k==='cat') filterCat=v; else filterEst=v; render(); }
 
-function verPrompt(id) { modalPrompt = id; render(); }
-function closeModal() { modalPrompt = null; render(); }
-
-function copyPrompt(id) {
-  const a = actions.find(x => x.id === id);
-  if (!a || !a.prompt) return;
-  const txt = a.prompt.trim();
-  const doIt = () => {
-    const btn = document.getElementById('btn-cp');
-    if (btn) { btn.textContent = '✓ Copiado'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '📋 Copiar prompt'; btn.classList.remove('copied'); }, 2000); }
-  };
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(txt).then(doIt).catch(() => fallbackCopy(txt, doIt));
-  } else { fallbackCopy(txt, doIt); }
-}
-
-function fallbackCopy(txt, cb) {
-  const ta = document.createElement('textarea');
-  ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0';
-  document.body.appendChild(ta); ta.select();
-  document.execCommand('copy');
-  document.body.removeChild(ta);
-  if (cb) cb();
-}
-
-function ejecutar(id) {
-  const a = actions.find(x => x.id === id);
-  if (!a || !a.prompt) return;
-  const txt = a.prompt.trim();
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(txt).catch(() => fallbackCopy(txt));
-  } else { fallbackCopy(txt); }
-  window.open('https://claude.ai/new', '_blank');
-  closeModal();
-}
-
-function setF(k, v) { if (k === 'cat') filterCat = v; else filterEst = v; render(); }
-
+// ── Action CRUD ───────────────────────────────────────────────────
 function newAction() {
   editId = null;
-  form = { accion:'', categoria:'Prompt SPAD', prioridad:'Media', responsable:'', fin:'', estado:'To Do', prompt:'', notas:'' };
+  form = { accion:'', categoria: categories[0]||'', prioridad:'Media', responsable:'', fin:'', estado:'To Do', prompt:'', notas:'' };
   showForm = true; render();
   setTimeout(() => document.getElementById('f-ac')?.focus(), 50);
 }
-function cancelForm() { showForm = false; editId = null; render(); }
-
+function cancelForm() { showForm=false; editId=null; render(); }
 function saveAction() {
-  const ac = (document.getElementById('f-ac').value || '').trim();
+  const ac = (document.getElementById('f-ac').value||'').trim();
   if (!ac) { alert('La acción es obligatoria.'); return; }
   const rec = {
     id: editId || nextId,
@@ -698,52 +651,156 @@ function saveAction() {
     prompt: document.getElementById('f-prm').value.trim(),
     notas: document.getElementById('f-not').value.trim()
   };
-  if (editId) {
-    const i = actions.findIndex(a => a.id === editId);
-    if (i >= 0) actions[i] = rec;
-  } else { nextId++; actions.push(rec); }
-  showForm = false; editId = null; save(); render();
+  if (editId) { const i=actions.findIndex(a=>a.id===editId); if(i>=0) actions[i]=rec; }
+  else { nextId++; actions.push(rec); }
+  showForm=false; editId=null; saveProject(); render();
 }
-
 function editAction(id) {
-  const a = actions.find(x => x.id === id);
-  if (!a) return;
-  editId = id; form = { ...a }; showForm = true; render();
-  setTimeout(() => document.getElementById('f-ac')?.focus(), 50);
+  const a = actions.find(x=>x.id===id); if(!a) return;
+  editId=id; form={...a}; showForm=true; render();
+  setTimeout(()=>document.getElementById('f-ac')?.focus(),50);
 }
-
-function askDelete(id) { confirmDel = id; render(); }
-function cancelDel() { confirmDel = null; render(); }
-function doDelete() { actions = actions.filter(a => a.id !== confirmDel); confirmDel = null; save(); render(); }
-
-function changeProject() { project = null; actions = []; nextId = 1; showForm = false; save(); render(); }
+function askDelete(id) { confirmDel=id; render(); }
+function cancelDel()   { confirmDel=null; render(); }
+function doDelete()    { actions=actions.filter(a=>a.id!==confirmDel); confirmDel=null; saveProject(); render(); }
 function resetAll() {
-  if (confirm('¿Resetear todas las acciones del proyecto?')) {
-    actions = []; nextId = 1; showForm = false; save(); render();
+  if (confirm('¿Resetear todas las acciones de este proyecto?')) {
+    actions=[]; nextId=1; showForm=false; saveProject(); render();
   }
 }
 
-function exportJSON() {
-  const d = JSON.stringify({ project, exportedAt: new Date().toISOString(), actions }, null, 2);
-  const a = document.createElement('a');
-  a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(d);
-  a.download = `seveng_${project}_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
+// ── Categories manager ────────────────────────────────────────────
+function openCatsMgr() { showCatsMgr=true; render(); }
+function closeCatsMgr(){ showCatsMgr=false; render(); }
+
+function renderCatsMgr() {
+  const div = document.createElement('div');
+  div.className = 'overlay';
+  div.addEventListener('click', e => { if(e.target===div) closeCatsMgr(); });
+
+  const usedCats = new Set(actions.map(a=>a.categoria));
+
+  div.innerHTML = `<div class="modal modal-sm">
+    <div class="modal-title">Categorías del proyecto</div>
+    <div class="cats-list">
+      ${categories.map((c,i)=>{
+        const used = usedCats.has(c);
+        return `<div class="cat-item">
+          <span class="cat-item-name">${esc(c)}</span>
+          <button class="cat-item-del" onclick="deleteCat(${i})" ${used?'disabled title="En uso por acciones existentes"':''}>✕</button>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="new-cat-row">
+      <input id="new-cat" type="text" placeholder="Nueva categoría..." maxlength="40" />
+      <button onclick="addCat()">Añadir</button>
+    </div>
+    <div class="cat-warning">Las categorías en uso no se pueden eliminar hasta reasignar sus acciones.</div>
+    <div class="mbtns"><button class="btn-close" onclick="closeCatsMgr()">Cerrar</button></div>
+  </div>`;
+
+  document.getElementById('app').appendChild(div);
+  document.getElementById('new-cat').addEventListener('keydown', e=>{ if(e.key==='Enter') addCat(); });
 }
-function exportCSV() {
-  const h = 'ID,ACCION,CATEGORIA,PRIORIDAD,ESTADO,FIN,PROMPT,NOTAS\n';
-  const r = actions.map(a => [
-    a.id,
-    `"${(a.accion||'').replace(/"/g,'""')}"`,
-    a.categoria, a.prioridad, a.estado, a.fin,
-    `"${(a.prompt||'').replace(/"/g,'""').replace(/\n/g,' ')}"`,
-    `"${(a.notas||'').replace(/"/g,'""')}"`
-  ].join(',')).join('\n');
-  const blob = new Blob([h + r], { type: 'text/csv' });
-  const a2 = document.createElement('a');
-  a2.href = URL.createObjectURL(blob);
-  a2.download = `seveng_${project}_${new Date().toISOString().slice(0,10)}.csv`;
-  a2.click();
+
+function addCat() {
+  const v = (document.getElementById('new-cat').value||'').trim();
+  if (!v) return;
+  if (categories.includes(v)) { alert('Esa categoría ya existe.'); return; }
+  categories.push(v); saveProject(); showCatsMgr=false; render();
+  setTimeout(()=>openCatsMgr(),10);
+}
+function deleteCat(i) {
+  const name = categories[i];
+  const inUse = actions.some(a=>a.categoria===name);
+  if (inUse) { alert('Esta categoría está en uso. Reasigna sus acciones primero.'); return; }
+  categories.splice(i,1);
+  if (filterCat===name) filterCat='Todos';
+  saveProject(); showCatsMgr=false; render();
+  setTimeout(()=>openCatsMgr(),10);
+}
+
+// ── Prompt modal ──────────────────────────────────────────────────
+function verPrompt(id) { modalPrompt=id; render(); }
+function closeModal()  { modalPrompt=null; render(); }
+
+function renderModalPrompt() {
+  const a = actions.find(x=>x.id===modalPrompt); if(!a) return;
+  const hasP = !!(a.prompt&&a.prompt.trim());
+  const div = document.createElement('div');
+  div.className='overlay';
+  div.addEventListener('click',e=>{if(e.target===div)closeModal();});
+  div.innerHTML=`<div class="modal">
+    <div class="modal-title">${esc(a.accion)}</div>
+    <div class="modal-meta">
+      <span class="badge b-cat">${esc(a.categoria)}</span>
+      <span class="badge ${sp(a.prioridad)}">${a.prioridad}</span>
+      <span class="badge ${sc(a.estado)}">${a.estado}</span>
+    </div>
+    ${hasP
+      ?`<div class="prompt-display">${esc(a.prompt)}</div>
+        <div class="modal-hint"><strong>▶ Ejecutar</strong> — copia el prompt y abre claude.ai/new en pestaña nueva. Pega con Ctrl+V.<br><strong>📋 Copiar</strong> — copia el prompt para pegarlo donde quieras.</div>
+        <div class="modal-actions">
+          <button class="btn-copy" id="btn-cp" onclick="copyPrompt(${a.id})">📋 Copiar prompt</button>
+          <button class="btn-exec-m" onclick="ejecutar(${a.id})">▶ Abrir sesión nueva</button>
+          <button class="btn-close" onclick="closeModal()">Cerrar</button>
+        </div>`
+      :`<div class="no-prompt-msg">Esta acción no tiene prompt definido.</div>
+        <div class="modal-actions">
+          <button class="btn-save" onclick="closeModal();editAction(${a.id})">✎ Editar acción</button>
+          <button class="btn-close" onclick="closeModal()">Cerrar</button>
+        </div>`
+    }
+  </div>`;
+  document.getElementById('app').appendChild(div);
+}
+
+function renderModalDel() {
+  const div=document.createElement('div');
+  div.className='overlay';
+  div.addEventListener('click',e=>{if(e.target===div)cancelDel();});
+  div.innerHTML=`<div class="modal modal-sm">
+    <div class="modal-title">Eliminar acción</div>
+    <p style="font-size:13px;color:var(--gray3);margin:10px 0 0">¿Eliminar la acción #${confirmDel}? No se puede deshacer.</p>
+    <div class="mbtns"><button class="btn-cancel" onclick="cancelDel()">Cancelar</button><button class="btn-danger" onclick="doDelete()">Eliminar</button></div>
+  </div>`;
+  document.getElementById('app').appendChild(div);
+}
+
+// ── Prompt actions ────────────────────────────────────────────────
+function fallbackCopy(txt,cb){
+  const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';
+  document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  if(cb)cb();
+}
+function copyPrompt(id){
+  const a=actions.find(x=>x.id===id); if(!a||!a.prompt) return;
+  const cb=()=>{const b=document.getElementById('btn-cp');if(b){b.textContent='✓ Copiado';b.classList.add('copied');setTimeout(()=>{b.textContent='📋 Copiar prompt';b.classList.remove('copied');},2000);}};
+  if(navigator.clipboard) navigator.clipboard.writeText(a.prompt.trim()).then(cb).catch(()=>fallbackCopy(a.prompt.trim(),cb));
+  else fallbackCopy(a.prompt.trim(),cb);
+}
+function ejecutar(id){
+  const a=actions.find(x=>x.id===id); if(!a||!a.prompt) return;
+  const txt=a.prompt.trim();
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>fallbackCopy(txt));
+  else fallbackCopy(txt);
+  window.open('https://claude.ai/new','_blank');
+  closeModal();
+}
+
+// ── Export ────────────────────────────────────────────────────────
+function exportJSON(){
+  const d=JSON.stringify({project,exportedAt:new Date().toISOString(),categories,actions},null,2);
+  const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(d);
+  a.download=`seveng_${project}_${new Date().toISOString().slice(0,10)}.json`;a.click();
+}
+function exportCSV(){
+  const h='ID,ACCION,CATEGORIA,PRIORIDAD,ESTADO,FIN,PROMPT,NOTAS\n';
+  const r=actions.map(a=>[a.id,`"${(a.accion||'').replace(/"/g,'""')}"`,a.categoria,a.prioridad,a.estado,a.fin,
+    `"${(a.prompt||'').replace(/"/g,'""').replace(/\n/g,' ')}"`,`"${(a.notas||'').replace(/"/g,'""')}"`].join(',')).join('\n');
+  const blob=new Blob([h+r],{type:'text/csv'});
+  const a2=document.createElement('a');a2.href=URL.createObjectURL(blob);
+  a2.download=`seveng_${project}_${new Date().toISOString().slice(0,10)}.csv`;a2.click();
 }
 
 render();
