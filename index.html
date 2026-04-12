@@ -116,6 +116,18 @@
     white-space: nowrap;
   }
   .new-proj-row button:hover { background: var(--navy3); }
+  .import-row {
+    border-top: 1px solid var(--border);
+    padding: 10px 12px 12px;
+    background: #fff;
+  }
+  .import-row button {
+    width: 100%; padding: 9px 12px;
+    background: transparent; color: var(--gray3);
+    border: 1px solid var(--border); border-radius: 4px;
+    cursor: pointer; font-family: var(--sans); font-size: 13px;
+  }
+  .import-row button:hover { border-color: var(--navy2); color: var(--navy2); }
 
   /* STATS */
   .stats {
@@ -379,6 +391,19 @@ function saveProject() {
   if (!project) return;
   try { localStorage.setItem(projKey(project), JSON.stringify({ actions, nextId, categories })); } catch(e) {}
 }
+function getProjectSnapshot(name) {
+  try {
+    const d = JSON.parse(localStorage.getItem(projKey(name)) || 'null');
+    if (d) {
+      return {
+        actions: d.actions || [],
+        nextId: d.nextId || 1,
+        categories: d.categories || [...DEFAULT_CATS]
+      };
+    }
+  } catch(e) {}
+  return { actions: [], nextId: 1, categories: [...DEFAULT_CATS] };
+}
 
 loadRoot();
 
@@ -425,6 +450,10 @@ function renderSplash() {
       <div class="new-proj-row">
         <input id="pi" type="text" placeholder="Nombre del nuevo proyecto..." />
         <button onclick="createProject()">+ Crear</button>
+      </div>
+      <div class="import-row">
+        <button onclick="openImportDialog()">Importar JSON / CSV</button>
+        <input id="import-file" type="file" accept=".json,.csv,application/json,text/csv" style="display:none" onchange="handleImport(event)" />
       </div>
     </div>
   </div>`;
@@ -598,8 +627,10 @@ function renderMain() {
     <div class="fbtns">
       <button onclick="exportJSON()">Exportar JSON</button>
       <button onclick="exportCSV()">Exportar CSV</button>
+      <button onclick="openImportDialog()">Importar JSON/CSV</button>
       <button class="btn-reset" onclick="resetAll()">Resetear acciones</button>
     </div>
+    <input id="import-file" type="file" accept=".json,.csv,application/json,text/csv" style="display:none" onchange="handleImport(event)" />
   </div>
   `;
 
@@ -782,6 +813,264 @@ function copyPrompt(id){
 }
 
 
+// ── Import ───────────────────────────────────────────────────────
+function openImportDialog() {
+  document.getElementById('import-file')?.click();
+}
+
+async function handleImport(event) {
+  const input = event.target;
+  const file = input.files && input.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const payload = parseImportedFile(file.name, text);
+    applyImportedData(payload, file.name);
+  } catch (error) {
+    alert(error.message || 'No se pudo importar el archivo.');
+  } finally {
+    input.value = '';
+  }
+}
+
+function parseImportedFile(fileName, text) {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith('.json')) return parseImportedJSON(text);
+  if (lower.endsWith('.csv')) return parseImportedCSV(text);
+  throw new Error('Formato no soportado. Usa un archivo JSON o CSV.');
+}
+
+function parseImportedJSON(text) {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (error) {
+    throw new Error('El archivo JSON no es valido.');
+  }
+  if (!data || !Array.isArray(data.actions)) {
+    throw new Error('El JSON no contiene una lista de acciones valida.');
+  }
+  return {
+    project: typeof data.project === 'string' ? data.project.trim() : '',
+    categories: Array.isArray(data.categories) ? data.categories : [],
+    actions: data.actions
+  };
+}
+
+function parseImportedCSV(text) {
+  const rows = parseCSV(text);
+  if (!rows.length) {
+    throw new Error('El CSV esta vacio.');
+  }
+
+  const headers = rows[0].map(mapCSVHeader);
+  if (!headers.includes('accion')) {
+    throw new Error('El CSV no contiene una columna ACCION reconocible.');
+  }
+
+  const actionsFromCsv = rows.slice(1)
+    .filter(row => row.some(value => String(value || '').trim() !== ''))
+    .map(row => {
+      const record = {};
+      headers.forEach((key, index) => {
+        if (!key) return;
+        record[key] = row[index] || '';
+      });
+      return record;
+    });
+
+  return { project: '', categories: [], actions: actionsFromCsv };
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let value = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (text[index + 1] === '"') {
+          value += '"';
+          index++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        value += char;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = true;
+    } else if (char === ',') {
+      row.push(value);
+      value = '';
+    } else if (char === '\n') {
+      row.push(value);
+      rows.push(row);
+      row = [];
+      value = '';
+    } else if (char !== '\r') {
+      value += char;
+    }
+  }
+
+  if (value !== '' || row.length) {
+    row.push(value);
+    rows.push(row);
+  }
+
+  while (rows.length && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === '') {
+    rows.pop();
+  }
+
+  return rows;
+}
+
+function mapCSVHeader(header) {
+  const normalized = String(header || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z]/g, '');
+
+  if (normalized === 'id') return 'id';
+  if (normalized === 'accion' || normalized === 'tarea' || normalized === 'acciontarea') return 'accion';
+  if (normalized === 'categoria') return 'categoria';
+  if (normalized === 'prioridad') return 'prioridad';
+  if (normalized === 'estado') return 'estado';
+  if (normalized === 'responsable') return 'responsable';
+  if (normalized === 'fin' || normalized === 'fechafin') return 'fin';
+  if (normalized === 'prompt') return 'prompt';
+  if (normalized === 'notas') return 'notas';
+  return '';
+}
+
+function applyImportedData(payload, fileName) {
+  const importedActions = normalizeImportedActions(payload.actions || []);
+  const targetProject = project || resolveImportedProjectName(payload.project, fileName);
+  const existing = project ? { actions, nextId, categories } : getProjectSnapshot(targetProject);
+  const actionLabel = importedActions.length === 1 ? 'accion' : 'acciones';
+
+  if (existing.actions.length > 0) {
+    const targetLabel = project ? `el proyecto actual "${targetProject}"` : `el proyecto "${targetProject}"`;
+    if (!confirm(`Se van a cargar ${importedActions.length} ${actionLabel} en ${targetLabel} y se sustituira el contenido actual. ¿Continuar?`)) {
+      return;
+    }
+  }
+
+  project = targetProject;
+  if (!projectList.includes(targetProject)) {
+    projectList.push(targetProject);
+    saveRoot();
+  }
+
+  actions = importedActions;
+  categories = buildImportedCategories(payload.categories || [], importedActions);
+  nextId = importedActions.reduce((maxId, action) => Math.max(maxId, action.id), 0) + 1;
+
+  filterCat = 'Todos';
+  filterEst = 'Todos';
+  showForm = false;
+  editId = null;
+  confirmDel = null;
+  modalPrompt = null;
+  showCatsMgr = false;
+
+  saveProject();
+  render();
+  alert(`Importacion completada: ${importedActions.length} ${actionLabel} cargadas en "${targetProject}".`);
+}
+
+function resolveImportedProjectName(importedName, fileName) {
+  const explicitName = String(importedName || '').trim();
+  if (explicitName) return explicitName;
+
+  const baseName = fileName.replace(/\.[^.]+$/, '');
+  const match = baseName.match(/^seveng_(.+)_\d{4}-\d{2}-\d{2}$/i);
+  if (match && match[1]) return match[1];
+  if (baseName) return baseName;
+  return 'Proyecto importado';
+}
+
+function buildImportedCategories(importedCategories, importedActions) {
+  const merged = [...DEFAULT_CATS];
+  importedCategories.forEach(category => pushUniqueCategory(merged, category));
+  importedActions.forEach(action => pushUniqueCategory(merged, action.categoria));
+  return merged;
+}
+
+function pushUniqueCategory(list, category) {
+  const clean = String(category || '').trim();
+  if (clean && !list.includes(clean)) list.push(clean);
+}
+
+function normalizeImportedActions(items) {
+  const normalized = [];
+  const usedIds = new Set();
+  let nextAvailableId = 1;
+
+  items.forEach((item, index) => {
+    const action = normalizeImportedAction(item);
+    if (!action) return;
+
+    let resolvedId = Number.isInteger(action.id) && action.id > 0 && !usedIds.has(action.id)
+      ? action.id
+      : null;
+
+    if (resolvedId === null) {
+      while (usedIds.has(nextAvailableId)) nextAvailableId++;
+      resolvedId = nextAvailableId;
+    }
+
+    usedIds.add(resolvedId);
+    nextAvailableId = Math.max(nextAvailableId, resolvedId + 1);
+    normalized.push({ ...action, id: resolvedId });
+  });
+
+  return normalized;
+}
+
+function normalizeImportedAction(item) {
+  if (!item || typeof item !== 'object') return null;
+
+  const accion = String(readImportedField(item, ['accion', 'ACCION', 'Accion', 'Acción']) || '').trim();
+  if (!accion) return null;
+
+  const categoria = String(readImportedField(item, ['categoria', 'CATEGORIA', 'Categoria', 'Categoría']) || '').trim();
+  const prioridad = String(readImportedField(item, ['prioridad', 'PRIORIDAD', 'Prioridad']) || '').trim();
+  const estado = String(readImportedField(item, ['estado', 'ESTADO', 'Estado']) || '').trim();
+  const rawId = parseInt(readImportedField(item, ['id', 'ID']), 10);
+
+  return {
+    id: Number.isInteger(rawId) ? rawId : 0,
+    accion,
+    categoria: categoria || DEFAULT_CATS[0],
+    prioridad: PRIS.includes(prioridad) ? prioridad : 'Media',
+    responsable: String(readImportedField(item, ['responsable', 'RESPONSABLE', 'Responsable']) || '').trim(),
+    fin: String(readImportedField(item, ['fin', 'FIN', 'Fecha fin', 'fecha_fin', 'fechaFin']) || '').trim(),
+    estado: ESTS.includes(estado) ? estado : 'To Do',
+    prompt: String(readImportedField(item, ['prompt', 'PROMPT', 'Prompt']) || '').trim(),
+    notas: String(readImportedField(item, ['notas', 'NOTAS', 'Notas']) || '').trim()
+  };
+}
+
+function readImportedField(item, keys) {
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(item, key) && item[key] != null) {
+      return item[key];
+    }
+  }
+  return '';
+}
+
+
 // ── Export ────────────────────────────────────────────────────────
 function exportJSON(){
   const d=JSON.stringify({project,exportedAt:new Date().toISOString(),categories,actions},null,2);
@@ -789,9 +1078,10 @@ function exportJSON(){
   a.download=`seveng_${project}_${new Date().toISOString().slice(0,10)}.json`;a.click();
 }
 function exportCSV(){
-  const h='ID,ACCION,CATEGORIA,PRIORIDAD,ESTADO,FIN,PROMPT,NOTAS\n';
-  const r=actions.map(a=>[a.id,`"${(a.accion||'').replace(/"/g,'""')}"`,a.categoria,a.prioridad,a.estado,a.fin,
-    `"${(a.prompt||'').replace(/"/g,'""').replace(/\n/g,' ')}"`,`"${(a.notas||'').replace(/"/g,'""')}"`].join(',')).join('\n');
+  const h='ID,ACCION,CATEGORIA,PRIORIDAD,ESTADO,RESPONSABLE,FIN,PROMPT,NOTAS\n';
+  const r=actions.map(a=>[a.id,`"${(a.accion||'').replace(/"/g,'""')}"`,a.categoria,a.prioridad,a.estado,
+    `"${(a.responsable||'').replace(/"/g,'""')}"`,a.fin,
+    `"${(a.prompt||'').replace(/"/g,'""')}"`,`"${(a.notas||'').replace(/"/g,'""')}"`].join(',')).join('\n');
   const blob=new Blob([h+r],{type:'text/csv'});
   const a2=document.createElement('a');a2.href=URL.createObjectURL(blob);
   a2.download=`seveng_${project}_${new Date().toISOString().slice(0,10)}.csv`;a2.click();
