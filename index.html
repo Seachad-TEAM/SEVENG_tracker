@@ -183,6 +183,13 @@
     padding: 16px; background: #fff;
   }
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .compact-fields {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1.2fr .9fr 1.2fr 1fr .95fr;
+    gap: 12px;
+    align-items: end;
+  }
   .ff { grid-column: 1/-1; }
   .fr { display: flex; flex-direction: column; gap: 5px; }
   .fl { font-size: 11px; color: var(--gray3); text-transform: uppercase; letter-spacing: .6px; }
@@ -326,11 +333,20 @@
   .new-cat-row button:hover { background: var(--navy3); }
   .cat-warning { font-size: 11px; color: var(--gray3); margin-top: 6px; }
 
+  @media (max-width: 1100px) {
+    .compact-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
   @media (max-width: 700px) {
     .stats { grid-template-columns: repeat(3,1fr); }
     .form-grid { grid-template-columns: 1fr; }
+    .compact-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .ff { grid-column: 1; }
     .tbl-wrap, .filters, .toolbar, .foot { padding-left: 12px; padding-right: 12px; }
+  }
+
+  @media (max-width: 520px) {
+    .compact-fields { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -616,25 +632,27 @@ function renderMain() {
         <label class="fl">Acción / Tarea <span class="req">*</span></label>
         <input id="f-ac" type="text" value="${esc(form.accion)}" placeholder="¿Qué hay que hacer?" />
       </div>
-      <div class="fr">
-        <label class="fl">Categoría</label>
-        <select id="f-cat">${renderCategoryOptions(form.categoria)}</select>
-      </div>
-      <div class="fr">
-        <label class="fl">Prioridad</label>
-        <select id="f-pri">${PRIS.map(p=>`<option value="${p}"${form.prioridad===p?' selected':''}>${p}</option>`).join('')}</select>
-      </div>
-      <div class="fr">
-        <label class="fl">Responsable</label>
-        <input id="f-res" type="text" value="${esc(form.responsable)}" placeholder="Nombre o rol..." />
-      </div>
-      <div class="fr">
-        <label class="fl">Fecha fin</label>
-        <input id="f-fin" type="date" value="${form.fin}" />
-      </div>
-      <div class="fr">
-        <label class="fl">Estado</label>
-        <select id="f-est">${ESTS.map(e=>`<option value="${e}"${form.estado===e?' selected':''}>${e}</option>`).join('')}</select>
+      <div class="compact-fields">
+        <div class="fr">
+          <label class="fl">Categoría</label>
+          <select id="f-cat">${renderCategoryOptions(form.categoria)}</select>
+        </div>
+        <div class="fr">
+          <label class="fl">Prioridad</label>
+          <select id="f-pri">${PRIS.map(p=>`<option value="${p}"${form.prioridad===p?' selected':''}>${p}</option>`).join('')}</select>
+        </div>
+        <div class="fr">
+          <label class="fl">Responsable</label>
+          <input id="f-res" type="text" value="${esc(form.responsable)}" placeholder="Nombre o rol..." />
+        </div>
+        <div class="fr">
+          <label class="fl">Fecha fin</label>
+          <input id="f-fin" type="date" value="${form.fin}" />
+        </div>
+        <div class="fr">
+          <label class="fl">Estado</label>
+          <select id="f-est">${ESTS.map(e=>`<option value="${e}"${form.estado===e?' selected':''}>${e}</option>`).join('')}</select>
+        </div>
       </div>
       <div class="ff fr">
         <label class="fl">Prompt <span style="text-transform:none;letter-spacing:0;font-size:11px;opacity:.7">(texto exacto a enviar a Claude)</span></label>
