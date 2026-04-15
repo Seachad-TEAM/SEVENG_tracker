@@ -227,6 +227,12 @@
   }
   td { padding: 9px 12px; border-bottom: 1px solid var(--gray1); vertical-align: middle; }
   tr:hover td { background: #fafaf8; }
+  .task-row-overdue td { background: var(--red-light); }
+  .task-row-warning td { background: var(--amber-light); }
+  .task-row-ontrack td { background: var(--green-light); }
+  .task-row-overdue:hover td { background: #f9dfdc; }
+  .task-row-warning:hover td { background: #fbe9bf; }
+  .task-row-ontrack:hover td { background: #dceddf; }
   .action-name { font-size: 13px; }
   .action-note { font-size: 11px; color: var(--gray3); margin-top: 2px; }
 
@@ -439,6 +445,28 @@ function getTodayDateValue() {
   return `${year}-${month}-${day}`;
 }
 
+function parseDateValue(value) {
+  if (!value) return null;
+  const parts = String(value).split('-').map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+  const [year, month, day] = parts;
+  return new Date(year, month - 1, day);
+}
+
+function getTaskDeadlineState(fin) {
+  const dueDate = parseDateValue(fin);
+  if (!dueDate) return '';
+
+  const dueDateEnd = new Date(dueDate);
+  dueDateEnd.setHours(23, 59, 59, 999);
+
+  const now = new Date();
+  const remainingMs = dueDateEnd.getTime() - now.getTime();
+  if (remainingMs < 0) return 'task-row-overdue';
+  if (remainingMs < 24 * 60 * 60 * 1000) return 'task-row-warning';
+  return 'task-row-ontrack';
+}
+
 function resolveStoredFormPrefs(storedPrefs, storedActions, storedCategories) {
   try {
     const safeCategories = Array.isArray(storedCategories) ? storedCategories : [...DEFAULT_CATS];
@@ -494,23 +522,6 @@ function renderCategoryOptions(selectedValue) {
   return emptyOption + categoryOptions;
 }
 
-function tryGetPromptimizeHandler() {
-  const candidates = [
-    window.promptimize,
-    window.PromptimizeAI,
-    window.Promptimize,
-    window.__promptimize
-  ];
-
-  for (const candidate of candidates) {
-    if (!candidate) continue;
-    if (typeof candidate.optimize === 'function') return text => candidate.optimize(text);
-    if (typeof candidate.rewrite === 'function') return text => candidate.rewrite(text);
-  }
-
-  return null;
-}
-
 function bindFormInteractions() {
   const panel = document.getElementById('action-form-panel');
   if (!panel) return;
@@ -526,13 +537,6 @@ function bindFormInteractions() {
     event.preventDefault();
     saveAction();
   });
-
-  const promptButton = document.getElementById('f-prm-promptimize');
-  if (promptButton) {
-    const handler = tryGetPromptimizeHandler();
-    promptButton.disabled = !handler;
-    promptButton.title = handler ? 'Optimizar prompt con Promptimize AI' : 'Promptimize AI no detectado';
-  }
 }
 
 // ── Main render ───────────────────────────────────────────────────
@@ -656,9 +660,6 @@ function renderMain() {
       </div>
       <div class="ff fr">
         <label class="fl">Prompt <span style="text-transform:none;letter-spacing:0;font-size:11px;opacity:.7">(texto exacto a enviar a Claude)</span></label>
-        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
-          <button id="f-prm-promptimize" type="button" class="btn-cats" onclick="promptimizePrompt()">Promptimize AI</button>
-        </div>
         <textarea id="f-prm" class="prompt-ta" rows="6" placeholder="Escribe aquí el prompt completo que se enviará a Claude en una sesión limpia...">${esc(form.prompt)}</textarea>
       </div>
       <div class="ff fr">
@@ -677,7 +678,8 @@ function renderMain() {
     ? `<tr><td colspan="7" class="empty">Sin acciones. Pulsa "+ Nueva acción" para empezar.</td></tr>`
     : fil.map(a => {
         const hasP = !!(a.prompt && a.prompt.trim());
-        return `<tr>
+        const deadlineStateClass = getTaskDeadlineState(a.fin);
+        return `<tr class="${deadlineStateClass}">
           <td style="color:var(--gray3);font-family:var(--mono);font-size:11px;width:36px">#${a.id}</td>
           <td style="width:90px"><span class="badge b-cat">${esc(a.categoria)}</span></td>
           <td>
@@ -884,28 +886,6 @@ function deleteCat(i) {
   if (formPrefs.categoria===name) formPrefs.categoria='';
   saveProject(); showCatsMgr=false; render();
   setTimeout(()=>openCatsMgr(),10);
-}
-
-async function promptimizePrompt() {
-  const textarea = document.getElementById('f-prm');
-  if (!textarea) return;
-
-  const handler = tryGetPromptimizeHandler();
-  if (!handler) {
-    alert('Promptimize AI no esta disponible en esta vista.');
-    return;
-  }
-
-  try {
-    const result = await handler(textarea.value || '');
-    if (typeof result === 'string') {
-      textarea.value = result;
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
-      textarea.focus();
-    }
-  } catch (error) {
-    alert('No se pudo ejecutar Promptimize AI sobre este prompt.');
-  }
 }
 
 // ── Prompt modal ──────────────────────────────────────────────────
