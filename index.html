@@ -351,6 +351,7 @@ let project     = null; // current project name
 let actions     = [];
 let categories  = [...DEFAULT_CATS];
 let nextId      = 1;
+let formPrefs   = { categoria:'', responsable:'' };
 
 let filterCat   = 'Todos';
 let filterEst   = 'Todos';
@@ -380,16 +381,18 @@ function loadProject(name) {
       actions    = d.actions    || [];
       nextId     = d.nextId     || 1;
       categories = d.categories || [...DEFAULT_CATS];
+      formPrefs  = resolveStoredFormPrefs(d.formPrefs, actions, categories);
     } else {
       actions    = [];
       nextId     = 1;
       categories = [...DEFAULT_CATS];
+      formPrefs  = { categoria:'', responsable:'' };
     }
-  } catch(e) { actions=[]; nextId=1; categories=[...DEFAULT_CATS]; }
+  } catch(e) { actions=[]; nextId=1; categories=[...DEFAULT_CATS]; formPrefs={ categoria:'', responsable:'' }; }
 }
 function saveProject() {
   if (!project) return;
-  try { localStorage.setItem(projKey(project), JSON.stringify({ actions, nextId, categories })); } catch(e) {}
+  try { localStorage.setItem(projKey(project), JSON.stringify({ actions, nextId, categories, formPrefs })); } catch(e) {}
 }
 function getProjectSnapshot(name) {
   try {
@@ -411,6 +414,110 @@ loadRoot();
 const esc = s => !s ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const sc  = s => s==='To Do'?'b-todo':s==='In Progress'?'b-prog':s==='Done'?'b-done':s==='Blocked'?'b-blk':'';
 const sp  = p => p==='Alta'?'b-alta':p==='Media'?'b-media':'b-baja';
+
+function getTodayDateValue() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function resolveStoredFormPrefs(storedPrefs, storedActions, storedCategories) {
+  try {
+    const safeCategories = Array.isArray(storedCategories) ? storedCategories : [...DEFAULT_CATS];
+    const safeActions = Array.isArray(storedActions) ? storedActions : [];
+    const lastCategoria = (() => {
+      for (let index = safeActions.length - 1; index >= 0; index--) {
+        const value = String(safeActions[index]?.categoria || '').trim();
+        if (value && safeCategories.includes(value)) return value;
+      }
+      return '';
+    })();
+    const lastResponsable = (() => {
+      for (let index = safeActions.length - 1; index >= 0; index--) {
+        const value = String(safeActions[index]?.responsable || '').trim();
+        if (value) return value;
+      }
+      return '';
+    })();
+
+    return {
+      categoria: storedPrefs && typeof storedPrefs.categoria === 'string' && safeCategories.includes(storedPrefs.categoria)
+        ? storedPrefs.categoria
+        : lastCategoria,
+      responsable: storedPrefs && typeof storedPrefs.responsable === 'string'
+        ? storedPrefs.responsable.trim() || lastResponsable
+        : lastResponsable
+    };
+  } catch (error) {
+    return { categoria:'', responsable:'' };
+  }
+}
+
+function createInitialFormState() {
+  const categoria = categories.includes(formPrefs.categoria) ? formPrefs.categoria : '';
+  return {
+    accion: '',
+    categoria,
+    prioridad: 'Media',
+    responsable: formPrefs.responsable || '',
+    fin: getTodayDateValue(),
+    estado: 'To Do',
+    prompt: '',
+    notas: ''
+  };
+}
+
+function renderCategoryOptions(selectedValue) {
+  const normalized = categories.includes(selectedValue) ? selectedValue : '';
+  const emptyOption = `<option value=""${normalized===''?' selected':''}></option>`;
+  const categoryOptions = categories.map(category =>
+    `<option value="${esc(category)}"${normalized===category?' selected':''}>${esc(category)}</option>`
+  ).join('');
+  return emptyOption + categoryOptions;
+}
+
+function tryGetPromptimizeHandler() {
+  const candidates = [
+    window.promptimize,
+    window.PromptimizeAI,
+    window.Promptimize,
+    window.__promptimize
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (typeof candidate.optimize === 'function') return text => candidate.optimize(text);
+    if (typeof candidate.rewrite === 'function') return text => candidate.rewrite(text);
+  }
+
+  return null;
+}
+
+function bindFormInteractions() {
+  const panel = document.getElementById('action-form-panel');
+  if (!panel) return;
+
+  panel.addEventListener('keydown', event => {
+    if (event.key !== 'Enter') return;
+    if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) return;
+
+    const targetId = event.target?.id || '';
+    if (targetId === 'f-prm' || targetId === 'f-not') return;
+    if (event.target instanceof HTMLButtonElement) return;
+
+    event.preventDefault();
+    saveAction();
+  });
+
+  const promptButton = document.getElementById('f-prm-promptimize');
+  if (promptButton) {
+    const handler = tryGetPromptimizeHandler();
+    promptButton.disabled = !handler;
+    promptButton.title = handler ? 'Optimizar prompt con Promptimize AI' : 'Promptimize AI no detectado';
+  }
+}
 
 // ── Main render ───────────────────────────────────────────────────
 function render() { project ? renderMain() : renderSplash(); }
@@ -475,7 +582,7 @@ function openProject(name) {
   loadProject(name);
   filterCat = 'Todos'; filterEst = 'Todos';
   showForm = false; editId = null;
-  form.categoria = categories[0] || '';
+  form = createInitialFormState();
   render();
 }
 
@@ -503,7 +610,7 @@ function renderMain() {
 
   // Form
   const formHtml = showForm ? `
-  <div class="form-panel">
+  <div id="action-form-panel" class="form-panel">
     <div class="form-grid">
       <div class="ff fr">
         <label class="fl">Acción / Tarea <span class="req">*</span></label>
@@ -511,7 +618,7 @@ function renderMain() {
       </div>
       <div class="fr">
         <label class="fl">Categoría</label>
-        <select id="f-cat">${categories.map(c=>`<option value="${c}"${form.categoria===c?' selected':''}>${c}</option>`).join('')}</select>
+        <select id="f-cat">${renderCategoryOptions(form.categoria)}</select>
       </div>
       <div class="fr">
         <label class="fl">Prioridad</label>
@@ -531,6 +638,9 @@ function renderMain() {
       </div>
       <div class="ff fr">
         <label class="fl">Prompt <span style="text-transform:none;letter-spacing:0;font-size:11px;opacity:.7">(texto exacto a enviar a Claude)</span></label>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
+          <button id="f-prm-promptimize" type="button" class="btn-cats" onclick="promptimizePrompt()">Promptimize AI</button>
+        </div>
         <textarea id="f-prm" class="prompt-ta" rows="6" placeholder="Escribe aquí el prompt completo que se enviará a Claude en una sesión limpia...">${esc(form.prompt)}</textarea>
       </div>
       <div class="ff fr">
@@ -637,6 +747,7 @@ function renderMain() {
   if (modalPrompt !== null) renderModalPrompt();
   if (confirmDel  !== null) renderModalDel();
   if (showCatsMgr)          renderCatsMgr();
+  if (showForm)             bindFormInteractions();
 }
 
 // ── Project navigation ────────────────────────────────────────────
@@ -664,7 +775,7 @@ function setF(k, btn) {
 // ── Action CRUD ───────────────────────────────────────────────────
 function newAction() {
   editId = null;
-  form = { accion:'', categoria: categories[0]||'', prioridad:'Media', responsable:'', fin:'', estado:'To Do', prompt:'', notas:'' };
+  form = createInitialFormState();
   showForm = true; render();
   setTimeout(() => document.getElementById('f-ac')?.focus(), 50);
 }
@@ -685,6 +796,10 @@ function saveAction() {
   };
   if (editId) { const i=actions.findIndex(a=>a.id===editId); if(i>=0) actions[i]=rec; }
   else { nextId++; actions.push(rec); }
+  formPrefs = {
+    categoria: categories.includes(rec.categoria) ? rec.categoria : '',
+    responsable: rec.responsable || ''
+  };
   showForm=false; editId=null; saveProject(); render();
 }
 function editAction(id) {
@@ -748,8 +863,31 @@ function deleteCat(i) {
   if (inUse) { alert('Esta categoría está en uso. Reasigna sus acciones primero.'); return; }
   categories.splice(i,1);
   if (filterCat===name) filterCat='Todos';
+  if (formPrefs.categoria===name) formPrefs.categoria='';
   saveProject(); showCatsMgr=false; render();
   setTimeout(()=>openCatsMgr(),10);
+}
+
+async function promptimizePrompt() {
+  const textarea = document.getElementById('f-prm');
+  if (!textarea) return;
+
+  const handler = tryGetPromptimizeHandler();
+  if (!handler) {
+    alert('Promptimize AI no esta disponible en esta vista.');
+    return;
+  }
+
+  try {
+    const result = await handler(textarea.value || '');
+    if (typeof result === 'string') {
+      textarea.value = result;
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      textarea.focus();
+    }
+  } catch (error) {
+    alert('No se pudo ejecutar Promptimize AI sobre este prompt.');
+  }
 }
 
 // ── Prompt modal ──────────────────────────────────────────────────
@@ -974,6 +1112,7 @@ function applyImportedData(payload, fileName) {
   actions = importedActions;
   categories = buildImportedCategories(payload.categories || [], importedActions);
   nextId = importedActions.reduce((maxId, action) => Math.max(maxId, action.id), 0) + 1;
+  formPrefs = resolveStoredFormPrefs(null, actions, categories);
 
   filterCat = 'Todos';
   filterEst = 'Todos';
